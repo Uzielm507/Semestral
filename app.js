@@ -59,11 +59,11 @@ const App = (() => {
             }).join('');
 
             const statsHtml = p.stats.map(s => {
-                let color = '#000';
-                if(s.stat.name === 'hp') color = '#ff3e3e'; // Rojo
-                if(s.stat.name === 'attack') color = '#f08030'; // Naranja
-                if(s.stat.name === 'defense') color = '#f8d030'; // Amarillo
-                if(s.stat.name === 'speed') color = '#f85888'; // Rosa
+                let color = '#4deeea';
+                if(s.stat.name === 'hp') color = '#4deeea'; // Rojo
+                if(s.stat.name === 'attack') color = '#4deeea'; // Naranja
+                if(s.stat.name === 'defense') color = '#4deeea'; // Amarillo
+                if(s.stat.name === 'speed') color = '#4deeea'; // Rosa
                 return `
                 <div class="stat-label">${s.stat.name.toUpperCase()}:</div>
                 <div class="stat-bar-container">
