@@ -1,357 +1,270 @@
-/* =====================================================
-   APP.JS - LÓGICA COMPLETA POKÉMON FINDER
-===================================================== */
-(() => {
-    const App = (() => {
+// Usamos IIFE para encapsular el código
+const App = (() => {
 
-        // --- 1. REFERENCIAS AL DOM ---
-        const el = {
-            navBuscar: document.getElementById('btn-nav-buscar'),
-            navHistorico: document.getElementById('btn-nav-historico'),
-            navVs: document.getElementById('btn-nav-vs'),
-            navFavoritos: document.getElementById('btn-nav-favoritos'),
-            views: document.querySelectorAll('.view-section'),
+    // 1. REFERENCIAS AL DOM
+    const el = {
+        // Navegación
+        navBtns: document.querySelectorAll('.nav-btn'),
+        views: document.querySelectorAll('.view-section'),
+        
+        // Búsqueda
+        form: document.querySelector('#search-form'),
+        input: document.querySelector('#pokemon-input'),
+        container: document.querySelector('#pokemon-container'),
+        
+        // Historial y Favoritos
+        historyList: document.querySelector('#history-list'),
+        btnClearHistory: document.querySelector('#btn-clear-history'),
+        favList: document.querySelector('#fav-list'),
+        btnClearFavs: document.querySelector('#btn-clear-favs'),
+        
+        // Batalla
+        vsInput1: document.querySelector('#vs-input-1'),
+        vsInput2: document.querySelector('#vs-input-2'),
+        btnBattle: document.querySelector('#btn-battle'),
+        battleRes: document.querySelector('#battle-results'),
+        
+        // Cajas de luchadores
+        f1Img: document.querySelector('#f1-img'), f1Name: document.querySelector('#f1-name'), 
+        f1Score: document.querySelector('#f1-score'), f1Winner: document.querySelector('#f1-winner'),
+        f2Img: document.querySelector('#f2-img'), f2Name: document.querySelector('#f2-name'), 
+        f2Score: document.querySelector('#f2-score'), f2Winner: document.querySelector('#f2-winner')
+    };
 
-            // Buscador
-            searchInput: document.getElementById('search-input'),
-            searchBtn: document.getElementById('btn-search-action'),
-            searchType: document.getElementsByName('searchType'),
-            startMsg: document.getElementById('start-message'),
+    // 2. UTILIDADES
+    const utils = {
+        async fetchPokemon(query) {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query.toLowerCase()}`);
+            if (!res.ok) throw new Error('POKÉMON NO ENCONTRADO');
+            return res.json();
+        },
+        async fetchUrl(url) {
+            const res = await fetch(url);
+            return res.json();
+        },
+        getStorage: (k) => JSON.parse(localStorage.getItem(k)) || [],
+        setStorage: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+    };
+
+    // 3. RENDERIZADO
+    const render = {
+        // Tarjeta principal
+        card: (p, isFav) => {
+            // Colores por tipo (simplificado)
+            const typeColors = { fire: '#f08030', water: '#6890f0', grass: '#78c850', electric: '#f8d030', psychic: '#f85888', normal: '#a8a878' };
             
-            // Tarjeta Pokémon
-            pokemonCard: document.getElementById('pokemon-card-container'),
-            sourceBadge: document.getElementById('data-source-badge'),
-            pokeName: document.getElementById('poke-name'),
-            pokeSprite: document.getElementById('poke-sprite'),
-            pokeTypes: document.getElementById('poke-types'),
-            pokeAbilities: document.getElementById('poke-abilities'),
-            pokeStats: document.getElementById('poke-stats-container'),
-            evolutionContainer: document.getElementById('evolution-container'),
-            favBtn: document.getElementById('btn-toggle-fav'),
+            const typesHtml = p.types.map(t => {
+                const color = typeColors[t.type.name] || '#000';
+                return `<span class="type-badge" style="background:${color}; border-color:black;">${t.type.name}</span>`;
+            }).join('');
 
-            // Tarjeta Habilidad
-            abilityCard: document.getElementById('ability-card-container'),
-            abilityName: document.getElementById('ability-name'),
-            abilityDesc: document.getElementById('ability-desc'),
-            abilityPokeList: document.getElementById('ability-pokemon-list'),
+            const statsHtml = p.stats.map(s => {
+                let color = '#000';
+                if(s.stat.name === 'hp') color = '#ff3e3e'; // Rojo
+                if(s.stat.name === 'attack') color = '#f08030'; // Naranja
+                if(s.stat.name === 'defense') color = '#f8d030'; // Amarillo
+                if(s.stat.name === 'speed') color = '#f85888'; // Rosa
+                return `
+                <div class="stat-label">${s.stat.name.toUpperCase()}:</div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${Math.min(s.base_stat/2, 100)}%; background-color:${color};"></div>
+                </div>`;
+            }).join('');
 
-            // Histórico y Favoritos
-            historyList: document.getElementById('history-list'),
-            clearHistory: document.getElementById('btn-clear-history'),
-            favList: document.getElementById('favorites-list'),
-            clearFavs: document.getElementById('btn-clear-favorites'),
+            const abilities = p.abilities.map(a => `${a.ability.name} ${a.is_hidden ? '(Oculta)' : ''}`).join(', ');
 
-            // VS
-            vsInput1: document.getElementById('vs-input-1'),
-            vsInput2: document.getElementById('vs-input-2'),
-            vsBtn: document.getElementById('btn-start-battle'),
-            battleResults: document.getElementById('battle-results'),
-            // ...referencias de luchadores se manejan dinámicamente o podrías agregarlas aquí
-        };
-
-        // --- 2. UTILIDADES Y API ---
-        const utils = {
-            // Obtener tipo de búsqueda (radio buttons)
-            getSearchType() {
-                return [...el.searchType].find(r => r.checked).value;
-            },
-
-            // Fetch genérico a PokeAPI
-            async fetchData(endpoint) {
-                const res = await fetch(endpoint);
-                if (!res.ok) throw new Error('No se encontraron datos');
-                return res.json();
-            },
-
-            // Manejo de LocalStorage
-            getStorage(key) { return JSON.parse(localStorage.getItem(key)) || []; },
-            setStorage(key, data) { localStorage.setItem(key, JSON.stringify(data)); },
-
-            // Cambiar Vistas
-            showView(viewId) {
-                el.views.forEach(v => v.classList.add('hidden'));
-                document.getElementById(viewId).classList.remove('hidden');
-                
-                // Actualizar botones del nav
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                const navId = 'btn-nav-' + viewId.replace('view-', '');
-                const btn = document.getElementById(navId);
-                if(btn) btn.classList.add('active');
-            }
-        };
-
-        // --- 3. LÓGICA DE RENDERIZADO ---
-        const render = {
-            
-            // Renderizar Pokémon
-            async pokemon(data) {
-                // 1. Mostrar tarjeta y ocultar mensajes
-                el.startMsg.classList.add('hidden');
-                el.abilityCard.classList.add('hidden');
-                el.pokemonCard.classList.remove('hidden');
-
-                // 2. Datos Básicos
-                el.sourceBadge.textContent = "DESDE API"; // O "DESDE CACHÉ" si implementas caché compleja
-                el.pokeName.textContent = `#${data.id} ${data.name.toUpperCase()}`;
-                
-                // Imagen: Intenta usar el arte oficial, si no, el sprite por defecto
-                const imgUrl = data.sprites.other?.['official-artwork']?.front_default || data.sprites.front_default;
-                el.pokeSprite.src = imgUrl;
-
-                // 3. Tipos (Colores visuales)
-                el.pokeTypes.innerHTML = data.types.map(t => 
-                    `<span class="type-badge">${t.type.name.toUpperCase()}</span>`
-                ).join('');
-
-                // 4. Habilidades
-                el.pokeAbilities.innerHTML = data.abilities.map(a => 
-                    `<div class="ability-tag">${a.ability.name} ${a.is_hidden ? '(Oculta)' : ''}</div>`
-                ).join('');
-
-                // 5. Estadísticas con Barras
-                el.pokeStats.innerHTML = data.stats.map(s => {
-                    // Calculamos un porcentaje simple (max base stat aprox 200)
-                    const percent = Math.min((s.base_stat / 200) * 100, 100);
-                    return `
-                    <div class="stat-row">
-                        <span class="stat-label">${s.stat.name.toUpperCase()}:</span>
-                        <div class="progress-bar-bg" style="background:#eee; flex:1; height:10px; border:2px solid #000; margin-left:5px;">
-                            <div class="progress-bar-fill" style="width: ${percent}%; background: #3eeadf; height:100%;"></div>
-                        </div>
-                        <span style="font-size:0.8rem; margin-left:5px;">${s.base_stat}</span>
-                    </div>`;
-                }).join('');
-
-                // 6. Configurar botón favorito
-                handlers.syncFavButton(data.name);
-                handlers.saveHistory(data.name);
-
-                // 7. Cadena de Evolución (Requiere fetch extra)
-                await render.evolutionChain(data.species.url);
-            },
-
-            // Renderizar Cadena de Evolución
-            async evolutionChain(speciesUrl) {
-                el.evolutionContainer.innerHTML = 'Cargando evoluciones...';
-                try {
-                    const speciesData = await utils.fetchData(speciesUrl);
-                    const evoData = await utils.fetchData(speciesData.evolution_chain.url);
-                    
-                    let chain = evoData.chain;
-                    let html = '';
-
-                    // Función recursiva para recorrer el árbol de evolución
-                    const traverse = (node) => {
-                        // Extraer ID de la URL para obtener la imagen
-                        const id = node.species.url.split('/').filter(Boolean).pop();
-                        const img = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-                        
-                        html += `
-                        <div class="evo-step" style="display:inline-flex; flex-direction:column; align-items:center; margin:0 10px;">
-                            <img src="${img}" width="60">
-                            <span style="font-size:0.7rem; font-weight:bold;">${node.species.name}</span>
-                        </div>`;
-
-                        if (node.evolves_to.length > 0) {
-                            html += `<i class="fa-solid fa-arrow-right" style="margin-top:20px;"></i>`;
-                            // Por simplicidad, tomamos la primera rama, pero podrían ser varias (ej. Eevee)
-                            node.evolves_to.forEach(next => traverse(next));
-                        }
-                    };
-
-                    el.evolutionContainer.innerHTML = ''; // Limpiar loader
-                    // Creamos un contenedor flex para las evoluciones
-                    const container = document.createElement('div');
-                    container.style.display = 'flex';
-                    container.style.alignItems = 'center';
-                    container.style.justifyContent = 'center';
-                    
-                    // Reiniciar html y procesar
-                    html = ''; 
-                    traverse(chain);
-                    container.innerHTML = html;
-                    el.evolutionContainer.appendChild(container);
-
-                } catch (e) {
-                    el.evolutionContainer.textContent = 'No se pudo cargar la evolución.';
-                }
-            },
-
-            // Renderizar Habilidad
-            async ability(data) {
-                el.startMsg.classList.add('hidden');
-                el.pokemonCard.classList.add('hidden');
-                el.abilityCard.classList.remove('hidden');
-
-                el.abilityName.textContent = data.name.toUpperCase().replace('-', ' ');
-                
-                // Buscar descripción en inglés
-                const entry = data.effect_entries.find(e => e.language.name === 'en');
-                el.abilityDesc.textContent = entry ? entry.effect : 'Sin descripción disponible.';
-
-                // Listar Pokémones
-                el.abilityPokeList.innerHTML = data.pokemon.map(p => `
-                    <div style="border:2px solid black; padding:5px; margin:2px; font-size:0.8rem; text-align:center;">
-                        ${p.pokemon.name}
+            return `
+                <div class="pokemon-card">
+                    <button class="fav-toggle-btn ${isFav ? 'is-favorite' : ''}" onclick="App.toggleFav('${p.name}')">
+                        <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                    </button>
+                    <div class="pokemon-img-container">
+                        <img src="${p.sprites.front_default}" alt="${p.name}" class="pokemon-img">
                     </div>
-                `).join('');
-            },
+                    <div class="pokemon-info">
+                        <h2 class="pokemon-name">#${p.id} ${p.name}</h2>
+                        <div class="pokemon-types">${typesHtml}</div>
+                        <div class="abilities-list"><strong>HABILIDADES:</strong> ${abilities}</div>
+                        <div class="stats-grid">${statsHtml}</div>
+                        <div class="evolution-section">
+                            <h3>CADENA EVOLUTIVA</h3>
+                            <div id="evo-chain-container" class="evolution-chain">Cargando...</div>
+                        </div>
+                    </div>
+                </div>`;
+        },
 
-            // Listas (Historial / Favoritos)
-            simpleList(element, storageKey) {
-                const data = utils.getStorage(storageKey);
-                element.innerHTML = '';
-                if (!data.length) {
-                    element.innerHTML = '<div class="empty-state"><p>Lista vacía</p></div>';
-                    return;
-                }
-                // Mostrar últimos agregados primero
-                data.reverse().forEach(name => {
-                    element.innerHTML += `
-                    <div class="list-item" style="border-bottom:2px solid #000; padding:10px; display:flex; justify-content:space-between;">
-                        <span>${name.toUpperCase()}</span>
-                        <button onclick="document.getElementById('search-input').value='${name}'; document.getElementById('btn-search-action').click();" style="cursor:pointer; background:var(--yellow); border:2px solid #000;">VER</button>
+        // Renderizar evoluciones recursivamente
+        evolutionChain: async (speciesUrl, containerId) => {
+            try {
+                const speciesData = await utils.fetchUrl(speciesUrl);
+                const evoData = await utils.fetchUrl(speciesData.evolution_chain.url);
+                const chain = evoData.chain;
+                const container = document.getElementById(containerId);
+
+                let html = '';
+                
+                const processNode = (node) => {
+                    const id = node.species.url.split('/').filter(Boolean).pop();
+                    const img = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+                    
+                    html += `
+                    <div class="evo-item" onclick="App.searchFromList('${node.species.name}')">
+                        <img src="${img}">
+                        <span style="font-size:0.8rem; font-weight:bold;">${node.species.name}</span>
                     </div>`;
-                });
-            },
 
-            // Batalla
-            battle(p1, p2) {
-                el.battleResults.classList.remove('hidden');
-
-                // Helper para renderizar tarjeta de peleador
-                const renderFighter = (prefix, p) => {
-                    document.getElementById(prefix + '-img').src = p.sprites.front_default;
-                    document.getElementById(prefix + '-name').textContent = p.name.toUpperCase();
-                    
-                    const totalStats = p.stats.reduce((sum, s) => sum + s.base_stat, 0);
-                    document.getElementById(prefix + '-points').textContent = totalStats + ' PTS';
-                    
-                    return totalStats;
+                    if (node.evolves_to.length > 0) {
+                        html += `<div class="evo-arrow"><i class="fa-solid fa-arrow-right"></i></div>`;
+                        node.evolves_to.forEach(next => processNode(next));
+                    }
                 };
 
-                const points1 = renderFighter('f1', p1);
-                const points2 = renderFighter('f2', p2);
+                processNode(chain);
+                container.innerHTML = html;
 
-                // Determinar ganador visualmente
-                const winnerBadge1 = document.querySelector('#fighter-1-card .winner-badge');
-                const winnerBadge2 = document.querySelector('#fighter-2-card .winner-badge');
-                
-                winnerBadge1.classList.add('hidden');
-                winnerBadge2.classList.add('hidden');
-
-                if(points1 > points2) winnerBadge1.classList.remove('hidden');
-                else if(points2 > points1) winnerBadge2.classList.remove('hidden');
-                
-                // Texto de análisis simple
-                document.getElementById('type-advantages-text').innerHTML = `
-                    <p><strong>${p1.name.toUpperCase()}</strong> tiene ${points1} puntos totales base.</p>
-                    <p><strong>${p2.name.toUpperCase()}</strong> tiene ${points2} puntos totales base.</p>
-                `;
+            } catch (e) {
+                document.getElementById(containerId).innerHTML = 'No disponible';
             }
-        };
+        },
 
-        // --- 4. MANEJADORES DE EVENTOS ---
-        const handlers = {
-            async handleSearch() {
-                const query = el.searchInput.value.trim().toLowerCase();
-                const type = utils.getSearchType();
-
-                if (!query) return alert('Por favor escribe algo.');
-
-                try {
-                    if (type === 'pokemon') {
-                        const data = await utils.fetchData(`https://pokeapi.co/api/v2/pokemon/${query}`);
-                        render.pokemon(data);
-                    } else {
-                        const data = await utils.fetchData(`https://pokeapi.co/api/v2/ability/${query.replace(/\s+/g, '-')}`);
-                        render.ability(data);
-                    }
-                } catch (error) {
-                    alert(error.message);
-                }
-            },
-
-            saveHistory(name) {
-                const hist = utils.getStorage('history');
-                // Evitar duplicados consecutivos o mover al inicio
-                const newHist = hist.filter(h => h !== name);
-                newHist.push(name);
-                utils.setStorage('history', newHist);
-            },
-
-            toggleFav() {
-                const name = el.pokeName.textContent.split(' ')[1].toLowerCase(); // Hack para sacar el nombre del H2
-                let favs = utils.getStorage('favorites');
-                
-                if (favs.includes(name)) {
-                    favs = favs.filter(f => f !== name);
-                } else {
-                    favs.push(name);
-                }
-                utils.setStorage('favorites', favs);
-                handlers.syncFavButton(name);
-            },
-
-            syncFavButton(name) {
-                const favs = utils.getStorage('favorites');
-                const isFav = favs.includes(name.toLowerCase());
-                el.favBtn.innerHTML = isFav 
-                    ? '<i class="fa-solid fa-heart" style="color:red;"></i>' 
-                    : '<i class="fa-regular fa-heart"></i>';
-            },
-
-            async handleBattle() {
-                const name1 = el.vsInput1.value.trim().toLowerCase();
-                const name2 = el.vsInput2.value.trim().toLowerCase();
-
-                if (!name1 || !name2) return alert('Ingresa dos Pokémon para pelear');
-
-                try {
-                    const [p1, p2] = await Promise.all([
-                        utils.fetchData(`https://pokeapi.co/api/v2/pokemon/${name1}`),
-                        utils.fetchData(`https://pokeapi.co/api/v2/pokemon/${name2}`)
-                    ]);
-                    render.battle(p1, p2);
-                } catch (error) {
-                    alert('Uno de los Pokémon no existe. Revisa los nombres.');
-                }
+        list: (container, listKey, emptyMsg) => {
+            const list = utils.getStorage(listKey);
+            container.innerHTML = '';
+            if(!list.length) {
+                container.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
+                return;
             }
-        };
+            list.reverse().forEach(name => {
+                container.innerHTML += `
+                <div class="list-item">
+                    <span style="font-weight:bold; text-transform:uppercase;">${name}</span>
+                    <button class="nav-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="App.searchFromList('${name}')">VER</button>
+                </div>`;
+            });
+        }
+    };
 
-        // --- 5. INICIALIZACIÓN ---
-        const init = () => {
-            // Event Listeners
-            el.searchBtn.addEventListener('click', handlers.handleSearch);
-            el.favBtn.addEventListener('click', handlers.toggleFav);
-            el.vsBtn.addEventListener('click', handlers.handleBattle);
-
-            el.clearHistory.addEventListener('click', () => {
+    // 4. MÉTODOS PÚBLICOS (ACCIONES)
+    const actions = {
+        init() {
+            // Listeners
+            el.form.addEventListener('submit', actions.handleSearch);
+            el.btnBattle.addEventListener('click', actions.handleBattle);
+            
+            el.btnClearHistory.addEventListener('click', () => {
                 localStorage.removeItem('history');
-                render.simpleList(el.historyList, 'history');
+                render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
             });
 
-            el.clearFavs.addEventListener('click', () => {
+            el.btnClearFavs.addEventListener('click', () => {
                 localStorage.removeItem('favorites');
-                render.simpleList(el.favList, 'favorites');
+                render.list(el.favList, 'favorites', 'SIN FAVORITOS');
             });
+        },
 
-            // Navegación
-            el.navBuscar.onclick = () => utils.showView('view-buscar');
-            el.navHistorico.onclick = () => {
-                utils.showView('view-historico');
-                render.simpleList(el.historyList, 'history');
-            };
-            el.navFavoritos.onclick = () => {
-                utils.showView('view-favoritos');
-                render.simpleList(el.favList, 'favorites');
-            };
-            el.navVs.onclick = () => utils.showView('view-vs');
-        };
+        // Router para cambiar pestañas
+        router(viewId) {
+            el.views.forEach(v => v.classList.remove('active'));
+            el.navBtns.forEach(b => b.classList.remove('active'));
 
-        return { init };
-    })();
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.getElementById(`nav-${viewId}`).classList.add('active');
 
-    // Arrancar la App
-    document.addEventListener('DOMContentLoaded', App.init);
+            // Refrescar listas si entramos a esas vistas
+            if(viewId === 'historial') render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
+            if(viewId === 'favoritos') render.list(el.favList, 'favorites', 'SIN FAVORITOS');
+        },
+
+        // Buscador principal
+        async handleSearch(e) {
+            e.preventDefault();
+            const query = el.input.value.trim();
+            if(!query) return;
+
+            el.container.innerHTML = `<div class="loading">CARGANDO...</div>`;
+
+            try {
+                const p = await utils.fetchPokemon(query);
+                
+                // Guardar Historial
+                const hist = utils.getStorage('history').filter(h => h !== p.name);
+                hist.push(p.name);
+                utils.setStorage('history', hist);
+
+                // Renderizar
+                const favs = utils.getStorage('favorites');
+                const isFav = favs.includes(p.name);
+                el.container.innerHTML = render.card(p, isFav);
+                
+                // Cargar evoluciones
+                render.evolutionChain(p.species.url, 'evo-chain-container');
+
+            } catch (err) {
+                el.container.innerHTML = `<div class="error-message">${err.message}</div>`;
+            }
+        },
+
+        searchFromList(name) {
+            el.input.value = name;
+            actions.router('buscar');
+            document.querySelector('#search-form button').click();
+        },
+
+        toggleFav(name) {
+            let favs = utils.getStorage('favorites');
+            if(favs.includes(name)) {
+                favs = favs.filter(f => f !== name);
+            } else {
+                favs.push(name);
+            }
+            utils.setStorage('favorites', favs);
+            
+            // Re-renderizar tarjeta actual para actualizar el icono
+            // (Un hack rápido es simular nueva búsqueda o manipular el DOM directamente)
+            const btn = document.querySelector('.fav-toggle-btn');
+            const icon = btn.querySelector('i');
+            btn.classList.toggle('is-favorite');
+            icon.classList.toggle('fa-solid');
+            icon.classList.toggle('fa-regular');
+        },
+
+        async handleBattle() {
+            const n1 = el.vsInput1.value.trim();
+            const n2 = el.vsInput2.value.trim();
+            if(!n1 || !n2) return alert("Ingresa dos Pokémon");
+
+            try {
+                const [p1, p2] = await Promise.all([utils.fetchPokemon(n1), utils.fetchPokemon(n2)]);
+                
+                el.battleRes.classList.remove('hidden');
+                
+                // Renderizar luchadores
+                const renderFighter = (prefix, p) => {
+                    const total = p.stats.reduce((acc, s) => acc + s.base_stat, 0);
+                    document.getElementById(prefix+'-img').src = p.sprites.front_default;
+                    document.getElementById(prefix+'-name').textContent = p.name.toUpperCase();
+                    document.getElementById(prefix+'-score').textContent = total + " PTS";
+                    return total;
+                };
+
+                const s1 = renderFighter('f1', p1);
+                const s2 = renderFighter('f2', p2);
+
+                el.f1Winner.classList.add('hidden');
+                el.f2Winner.classList.add('hidden');
+
+                if(s1 > s2) el.f1Winner.classList.remove('hidden');
+                else if(s2 > s1) el.f2Winner.classList.remove('hidden');
+
+            } catch (e) {
+                alert("Error: Revisa los nombres de los Pokémon");
+            }
+        }
+    };
+
+    return actions;
 })();
+
+// Iniciar app
+document.addEventListener('DOMContentLoaded', App.init);

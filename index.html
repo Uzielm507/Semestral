@@ -3,175 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Finder - Semestral DS5</title>
+    <title>PokeAPI Brutalism - Semestral</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <main class="pokeball-container">
+    <h1>POKÉMON FINDER</h1>
 
-        <header class="main-header">
-            <h1 class="app-title">POKÉMON FINDER</h1>
-            <nav class="main-nav">
-                <button class="nav-btn active" id="btn-nav-buscar"><i class="fa-solid fa-magnifying-glass"></i> BUSCAR</button>
-                <button class="nav-btn" id="btn-nav-historico"><i class="fa-solid fa-scroll"></i> HISTÓRICO</button>
-                <button class="nav-btn" id="btn-nav-vs"><i class="fa-solid fa-swords"></i> VS</button>
-                <button class="nav-btn" id="btn-nav-favoritos"><i class="fa-solid fa-heart"></i> FAVORITOS</button>
-            </nav>
-        </header>
+    <nav class="main-nav">
+        <button class="nav-btn active" id="nav-buscar" onclick="App.router('buscar')">
+            <i class="fa-solid fa-magnifying-glass"></i> BUSCAR
+        </button>
+        <button class="nav-btn" id="nav-historial" onclick="App.router('historial')">
+            <i class="fa-solid fa-clock-rotate-left"></i> HISTORIAL
+        </button>
+        <button class="nav-btn" id="nav-vs" onclick="App.router('vs')">
+            <i class="fa-solid fa-khanda"></i> BATALLA
+        </button>
+        <button class="nav-btn" id="nav-favoritos" onclick="App.router('favoritos')">
+            <i class="fa-solid fa-heart"></i> FAVORITOS
+        </button>
+    </nav>
 
-        <div class="content-display">
+    <section id="view-buscar" class="view-section active">
+        <form id="search-form">
+            <input type="text" id="pokemon-input" placeholder="NOMBRE O ID..." autocomplete="off">
+            <button type="submit" class="action-btn">BUSCAR</button>
+        </form>
 
-            <section id="view-buscar" class="view-section active">
-                
-                <div class="search-controls">
-                    <div class="search-type-toggle">
-                        <label>
-                            <input type="radio" name="searchType" value="pokemon" checked> 
-                            <span><i class="fa-solid fa-paw"></i> POKÉMON</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="searchType" value="ability"> 
-                            <span><i class="fa-solid fa-bolt"></i> HABILIDAD</span>
-                        </label>
-                    </div>
-                    <div class="search-bar">
-                        <input type="text" id="search-input" placeholder="NOMBRE O ID...">
-                        <button id="btn-search-action">BUSCAR</button>
-                    </div>
-                </div>
-
-                <div id="start-message" class="empty-state">
-                    <p>Ingresa un Pokémon para comenzar</p>
-                </div>
-
-                <div id="pokemon-card-container" class="pokemon-card hidden">
-                    
-                    <div class="source-badge" id="data-source-badge"></div>
-
-                    <div class="card-header">
-                        <h2 id="poke-name"></h2>
-                    </div>
-
-                    <div class="card-visuals">
-                        <div class="sprite-container">
-                            <img id="poke-sprite" src="" alt="Sprite Pokémon">
-                        </div>
-                        <div class="types-container" id="poke-types">
-                            </div>
-                    </div>
-
-                    <div class="abilities-section">
-                        <h3>HABILIDADES</h3>
-                        <div id="poke-abilities" class="abilities-list">
-                            </div>
-                    </div>
-
-                    <div class="stats-section" id="poke-stats-container">
-                        </div>
-
-                    <div class="favorite-action">
-                        <button id="btn-toggle-fav" class="fav-heart-btn">
-                            <i class="fa-regular fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div class="evolution-section">
-                        <h3>CADENA DE EVOLUCIÓN</h3>
-                        <div class="evolution-chain" id="evolution-container">
-                            </div>
-                    </div>
-                </div>
-
-                <div id="ability-card-container" class="ability-card hidden">
-                    <h2 id="ability-name"></h2>
-                    <p id="ability-desc"></p>
-                    <h3>POKÉMON CON ESTA HABILIDAD</h3>
-                    <div id="ability-pokemon-list" class="grid-list">
-                        </div>
-                </div>
-            </section>
-
-            <section id="view-historico" class="view-section hidden">
-                <div class="list-header">
-                    <h2>HISTÓRICO</h2>
-                </div>
-                <div id="history-list" class="pokemon-list-container">
-                    <div class="empty-state">
-                        <i class="fa-solid fa-box-open"></i>
-                        <p>NO HAY POKÉMONES EN EL HISTÓRICO</p>
-                    </div>
-                </div>
-                <button id="btn-clear-history" class="btn-danger">LIMPIAR TODO</button>
-            </section>
-
-            <section id="view-favoritos" class="view-section hidden">
-                <div class="list-header">
-                    <h2>FAVORITOS</h2>
-                </div>
-                <div id="favorites-list" class="pokemon-list-container">
-                    <div class="empty-state">
-                        <i class="fa-solid fa-heart-crack"></i>
-                        <p>NO TIENES POKÉMONES FAVORITOS</p>
-                    </div>
-                </div>
-                <button id="btn-clear-favorites" class="btn-danger">LIMPIAR TODO</button>
-            </section>
-
-            <section id="view-vs" class="view-section hidden">
-                <div class="vs-header">
-                    <h2>POKÉMON VS</h2>
-                </div>
-
-                <div class="vs-inputs">
-                    <div class="fighter-input">
-                        <input type="text" id="vs-input-1" placeholder="Pokémon 1...">
-                    </div>
-                    <div class="vs-badge">VS</div>
-                    <div class="fighter-input">
-                        <input type="text" id="vs-input-2" placeholder="Pokémon 2...">
-                    </div>
-                </div>
-
-                <button id="btn-start-battle" class="btn-battle">¡BATALLAR!</button>
-
-                <div id="battle-results" class="battle-results hidden">
-                    
-                    <div class="fighters-display">
-                        <div class="fighter-card" id="fighter-1-card">
-                            <div class="winner-badge hidden">GANADOR</div>
-                            <img src="" alt="Fighter 1" id="f1-img">
-                            <h3 id="f1-name">???</h3> <div class="f-types" id="f1-types"></div>
-                            <div class="total-points" id="f1-points">0 pts</div>
-                        </div>
-
-                        <div class="vs-divider">VS</div>
-
-                        <div class="fighter-card" id="fighter-2-card">
-                            <div class="winner-badge hidden">GANADOR</div>
-                            <img src="" alt="Fighter 2" id="f2-img">
-                            <h3 id="f2-name">???</h3> <div class="f-types" id="f2-types"></div>
-                            <div class="total-points" id="f2-points">0 pts</div>
-                        </div>
-                    </div>
-
-                    <div class="battle-analysis">
-                        <h3>ANÁLISIS DE BATALLA</h3>
-                        <div id="type-advantages-text" class="analysis-box"></div>
-                    </div>
-
-                    <div class="stats-comparison">
-                        <h3>COMPARACIÓN DE STATS</h3>
-                        <div id="comparison-chart"></div>
-                    </div>
-                </div>
-            </section>
-
+        <div id="pokemon-container">
+            <div class="empty-state">
+                <i class="fa-solid fa-arrow-up"></i> BUSCA UN POKÉMON PARA EMPEZAR
+            </div>
         </div>
-    </main>
-    <script src="app.js">
-        
-    </script>
+    </section>
+
+    <section id="view-historial" class="view-section">
+        <div class="section-header">BÚSQUEDAS RECIENTES</div>
+        <div id="history-list" class="simple-list"></div>
+        <button id="btn-clear-history" class="action-btn btn-black">LIMPIAR HISTORIAL</button>
+    </section>
+
+    <section id="view-vs" class="view-section">
+        <div class="vs-arena">
+            <div class="vs-inputs">
+                <input type="text" id="vs-input-1" placeholder="POKÉMON 1...">
+                <div class="vs-badge">VS</div>
+                <input type="text" id="vs-input-2" placeholder="POKÉMON 2...">
+            </div>
+            <button id="btn-battle" class="action-btn">¡PELEAR!</button>
+
+            <div id="battle-results" class="hidden">
+                <div class="fighters-display">
+                    
+                    <div class="fighter-box" id="f1-box">
+                        <div id="f1-winner" class="winner-badge hidden">GANADOR</div>
+                        <img id="f1-img" src="" alt="Fighter 1">
+                        <h3 id="f1-name">---</h3>
+                        <div id="f1-score" class="score-text">0</div>
+                    </div>
+
+                    <div class="fighter-box" id="f2-box">
+                        <div id="f2-winner" class="winner-badge hidden">GANADOR</div>
+                        <img id="f2-img" src="" alt="Fighter 2">
+                        <h3 id="f2-name">---</h3>
+                        <div id="f2-score" class="score-text">0</div>
+                    </div>
+
+                </div>
+                <div class="battle-log">
+                    La batalla se decide por la suma total de estadísticas base.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-favoritos" class="view-section">
+        <div class="section-header fav-header">MIS FAVORITOS</div>
+        <div id="fav-list" class="simple-list"></div>
+        <button id="btn-clear-favs" class="action-btn btn-black">BORRAR FAVORITOS</button>
+    </section>
+
+    <script src="app.js"></script>
 </body>
 </html>
