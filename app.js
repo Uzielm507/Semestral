@@ -1,30 +1,22 @@
-// Usamos IIFE para encapsular el código
 const App = (() => {
 
     // 1. REFERENCIAS AL DOM
     const el = {
-        // Navegación
         navBtns: document.querySelectorAll('.nav-btn'),
         views: document.querySelectorAll('.view-section'),
         
-        // Búsqueda
         form: document.querySelector('#search-form'),
         input: document.querySelector('#pokemon-input'),
         container: document.querySelector('#pokemon-container'),
         
-        // Historial y Favoritos
         historyList: document.querySelector('#history-list'),
-        btnClearHistory: document.querySelector('#btn-clear-history'),
         favList: document.querySelector('#fav-list'),
-        btnClearFavs: document.querySelector('#btn-clear-favs'),
         
-        // Batalla
         vsInput1: document.querySelector('#vs-input-1'),
         vsInput2: document.querySelector('#vs-input-2'),
         btnBattle: document.querySelector('#btn-battle'),
         battleRes: document.querySelector('#battle-results'),
         
-        // Cajas de luchadores
         f1Img: document.querySelector('#f1-img'), f1Name: document.querySelector('#f1-name'), 
         f1Score: document.querySelector('#f1-score'), f1Winner: document.querySelector('#f1-winner'),
         f2Img: document.querySelector('#f2-img'), f2Name: document.querySelector('#f2-name'), 
@@ -48,9 +40,7 @@ const App = (() => {
 
     // 3. RENDERIZADO
     const render = {
-        // Tarjeta principal
         card: (p, isFav) => {
-            // Colores por tipo (simplificado)
             const typeColors = { fire: '#f08030', water: '#6890f0', grass: '#78c850', electric: '#f8d030', psychic: '#f85888', normal: '#a8a878' };
             
             const typesHtml = p.types.map(t => {
@@ -60,14 +50,16 @@ const App = (() => {
 
             const statsHtml = p.stats.map(s => {
                 let color = '#4deeea';
-                if(s.stat.name === 'hp') color = '#4deeea'; // Rojo
-                if(s.stat.name === 'attack') color = '#4deeea'; // Naranja
-                if(s.stat.name === 'defense') color = '#4deeea'; // Amarillo
-                if(s.stat.name === 'speed') color = '#4deeea'; // Rosa
+                if(s.stat.name === 'hp') color = '#4deeea';
+                if(s.stat.name === 'attack') color = '#4deeea';
+                if(s.stat.name === 'defense') color = '#4deeea';
+                if(s.stat.name === 'speed') color = '#4deeea';
                 return `
-                <div class="stat-label">${s.stat.name.toUpperCase()}:</div>
-                <div class="stat-bar-container">
-                    <div class="stat-bar" style="width: ${Math.min(s.base_stat/2, 100)}%; background-color:${color};"></div>
+                <div class="stat-row">
+                    <div class="stat-label">${s.stat.name.toUpperCase()}:</div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar" style="width: ${Math.min(s.base_stat/2, 100)}%; background-color:${color};"></div>
+                    </div>
                 </div>`;
             }).join('');
 
@@ -94,7 +86,6 @@ const App = (() => {
                 </div>`;
         },
 
-        // Renderizar evoluciones recursivamente
         evolutionChain: async (speciesUrl, containerId) => {
             try {
                 const speciesData = await utils.fetchUrl(speciesUrl);
@@ -103,7 +94,6 @@ const App = (() => {
                 const container = document.getElementById(containerId);
 
                 let html = '';
-                
                 const processNode = (node) => {
                     const id = node.species.url.split('/').filter(Boolean).pop();
                     const img = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -119,64 +109,83 @@ const App = (() => {
                         node.evolves_to.forEach(next => processNode(next));
                     }
                 };
-
                 processNode(chain);
                 container.innerHTML = html;
-
             } catch (e) {
-                document.getElementById(containerId).innerHTML = 'No disponible';
+                if(document.getElementById(containerId)) document.getElementById(containerId).innerHTML = 'No disponible';
             }
         },
 
+        // --- AQUÍ ESTÁ LA LÓGICA DE LOS BOTONES DE HISTORIAL ---
         list: (container, listKey, emptyMsg) => {
             const list = utils.getStorage(listKey);
+            const favs = utils.getStorage('favorites'); // Obtenemos favoritos para pintar el corazón
+            
             container.innerHTML = '';
             if(!list.length) {
                 container.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
                 return;
             }
+
             list.reverse().forEach(name => {
-                container.innerHTML += `
-                <div class="list-item">
-                    <span style="font-weight:bold; text-transform:uppercase;">${name}</span>
-                    <button class="nav-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="App.searchFromList('${name}')">VER</button>
-                </div>`;
+                const isFav = favs.includes(name);
+                
+                // Si es la lista de HISTORIAL, mostramos los 3 botones
+                if (listKey === 'history') {
+                    container.innerHTML += `
+                    <div class="list-item">
+                        <span class="item-name">${name}</span>
+                        <div class="item-actions">
+                            <button class="nav-btn sm-btn" title="Ver" onclick="App.searchFromList('${name}')">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <button class="nav-btn sm-btn ${isFav ? 'fav-active' : ''}" title="Favorito" onclick="App.toggleFavFromList('${name}')">
+                                <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                            </button>
+                            <button class="nav-btn sm-btn btn-del" title="Borrar" onclick="App.removeFromHistory('${name}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                } else {
+                    // Si es FAVORITOS, mantenemos el estilo simple (o puedes agregar borrar también)
+                    container.innerHTML += `
+                    <div class="list-item">
+                        <span class="item-name">${name}</span>
+                        <button class="nav-btn sm-btn" onclick="App.searchFromList('${name}')">VER</button>
+                    </div>`;
+                }
             });
         }
     };
 
-    // 4. MÉTODOS PÚBLICOS (ACCIONES)
+    // 4. ACCIONES
     const actions = {
         init() {
-            // Listeners
             el.form.addEventListener('submit', actions.handleSearch);
             el.btnBattle.addEventListener('click', actions.handleBattle);
             
-            el.btnClearHistory.addEventListener('click', () => {
+            document.querySelector('#btn-clear-history').addEventListener('click', () => {
                 localStorage.removeItem('history');
                 render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
             });
 
-            el.btnClearFavs.addEventListener('click', () => {
+            document.querySelector('#btn-clear-favs').addEventListener('click', () => {
                 localStorage.removeItem('favorites');
                 render.list(el.favList, 'favorites', 'SIN FAVORITOS');
             });
         },
 
-        // Router para cambiar pestañas
         router(viewId) {
             el.views.forEach(v => v.classList.remove('active'));
             el.navBtns.forEach(b => b.classList.remove('active'));
-
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.getElementById(`nav-${viewId}`).classList.add('active');
 
-            // Refrescar listas si entramos a esas vistas
             if(viewId === 'historial') render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
             if(viewId === 'favoritos') render.list(el.favList, 'favorites', 'SIN FAVORITOS');
         },
 
-        // Buscador principal
         async handleSearch(e) {
             e.preventDefault();
             const query = el.input.value.trim();
@@ -187,19 +196,15 @@ const App = (() => {
             try {
                 const p = await utils.fetchPokemon(query);
                 
-                // Guardar Historial
-                const hist = utils.getStorage('history').filter(h => h !== p.name);
+                let hist = utils.getStorage('history').filter(h => h !== p.name);
                 hist.push(p.name);
                 utils.setStorage('history', hist);
 
-                // Renderizar
                 const favs = utils.getStorage('favorites');
                 const isFav = favs.includes(p.name);
                 el.container.innerHTML = render.card(p, isFav);
                 
-                // Cargar evoluciones
                 render.evolutionChain(p.species.url, 'evo-chain-container');
-
             } catch (err) {
                 el.container.innerHTML = `<div class="error-message">${err.message}</div>`;
             }
@@ -211,6 +216,22 @@ const App = (() => {
             document.querySelector('#search-form button').click();
         },
 
+        // Borrar uno individual del historial
+        removeFromHistory(name) {
+            let hist = utils.getStorage('history');
+            hist = hist.filter(h => h !== name);
+            utils.setStorage('history', hist);
+            // Re-renderizamos la lista
+            render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
+        },
+
+        // Agregar/Quitar favorito desde la lista de historial
+        toggleFavFromList(name) {
+            actions.toggleFav(name); // Reutilizamos la lógica de guardado
+            // Re-renderizamos el historial para que se actualice el corazón
+            render.list(el.historyList, 'history', 'SIN BÚSQUEDAS RECIENTES');
+        },
+
         toggleFav(name) {
             let favs = utils.getStorage('favorites');
             if(favs.includes(name)) {
@@ -220,13 +241,16 @@ const App = (() => {
             }
             utils.setStorage('favorites', favs);
             
-            // Re-renderizar tarjeta actual para actualizar el icono
-            // (Un hack rápido es simular nueva búsqueda o manipular el DOM directamente)
+            // Si estamos viendo la tarjeta del pokemon, actualizamos su botón también
             const btn = document.querySelector('.fav-toggle-btn');
-            const icon = btn.querySelector('i');
-            btn.classList.toggle('is-favorite');
-            icon.classList.toggle('fa-solid');
-            icon.classList.toggle('fa-regular');
+            const currentPokeName = document.querySelector('.pokemon-name');
+            
+            if (btn && currentPokeName && currentPokeName.textContent.toLowerCase().includes(name)) {
+                const icon = btn.querySelector('i');
+                btn.classList.toggle('is-favorite');
+                icon.classList.toggle('fa-solid');
+                icon.classList.toggle('fa-regular');
+            }
         },
 
         async handleBattle() {
@@ -236,10 +260,8 @@ const App = (() => {
 
             try {
                 const [p1, p2] = await Promise.all([utils.fetchPokemon(n1), utils.fetchPokemon(n2)]);
-                
                 el.battleRes.classList.remove('hidden');
                 
-                // Renderizar luchadores
                 const renderFighter = (prefix, p) => {
                     const total = p.stats.reduce((acc, s) => acc + s.base_stat, 0);
                     document.getElementById(prefix+'-img').src = p.sprites.front_default;
@@ -253,10 +275,8 @@ const App = (() => {
 
                 el.f1Winner.classList.add('hidden');
                 el.f2Winner.classList.add('hidden');
-
                 if(s1 > s2) el.f1Winner.classList.remove('hidden');
                 else if(s2 > s1) el.f2Winner.classList.remove('hidden');
-
             } catch (e) {
                 alert("Error: Revisa los nombres de los Pokémon");
             }
@@ -266,5 +286,4 @@ const App = (() => {
     return actions;
 })();
 
-// Iniciar app
 document.addEventListener('DOMContentLoaded', App.init);

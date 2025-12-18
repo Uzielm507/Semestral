@@ -250,3 +250,50 @@ button.action-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 bla
 .battle-log { margin-top:15px; background:white; border:4px solid black; padding:10px; }
 
 .hidden { display: none !important; }
+
+/* --- ACTUALIZACIÓN DE ESTILOS DE LISTA --- */
+
+.list-item {
+    background: white; 
+    border: 4px solid black; 
+    padding: 10px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-shadow: 4px 4px 0 black;
+    margin-bottom: 10px; /* Separación entre items */
+}
+
+.item-name {
+    font-weight: bold; 
+    text-transform: uppercase;
+    font-size: 1.1rem;
+}
+
+/* Grupo de botones a la derecha */
+.item-actions {
+    display: flex;
+    gap: 8px; /* Espacio entre los botoncitos */
+}
+
+/* Botones pequeños de la lista */
+.sm-btn {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    min-width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo activo para el corazón (Rojo) */
+.fav-active i {
+    color: red;
+}
+
+/* Hover para el botón de borrar (Rojo de alerta) */
+.btn-del:hover {
+    background-color: var(--accent-color) !important;
+    color: white;
+    border-color: black;
+}
