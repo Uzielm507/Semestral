@@ -40,7 +40,7 @@ const App = (() => {
 
     // 3. RENDERIZADO
     const render = {
-        card: (p, isFav) => {
+        card: (p, isFav, isCache) => {
             const typeColors = { fire: '#f08030', water: '#6890f0', grass: '#78c850', electric: '#f8d030', psychic: '#f85888', normal: '#a8a878' };
             
             const typesHtml = p.types.map(t => {
@@ -49,35 +49,40 @@ const App = (() => {
             }).join('');
 
             const statsHtml = p.stats.map(s => {
-                let color = '#4deeea';
-                if(s.stat.name === 'hp') color = '#4deeea';
-                if(s.stat.name === 'attack') color = '#4deeea';
-                if(s.stat.name === 'defense') color = '#4deeea';
-                if(s.stat.name === 'speed') color = '#4deeea';
                 return `
                 <div class="stat-row">
                     <div class="stat-label">${s.stat.name.toUpperCase()}:</div>
                     <div class="stat-bar-container">
-                        <div class="stat-bar" style="width: ${Math.min(s.base_stat/2, 100)}%; background-color:${color};"></div>
+                        <div class="stat-bar" style="width: ${Math.min(s.base_stat/2, 100)}%; background-color:#4deeea;"></div>
                     </div>
                 </div>`;
             }).join('');
 
             const abilities = p.abilities.map(a => `${a.ability.name} ${a.is_hidden ? '(Oculta)' : ''}`).join(', ');
 
+            // Definimos el origen
+            const originText = isCache ? 'DESDE CACHÉ' : 'DESDE API';
+            const originClass = isCache ? 'origin-cache' : 'origin-api';
+
             return `
                 <div class="pokemon-card">
-                    <button class="fav-toggle-btn ${isFav ? 'is-favorite' : ''}" onclick="App.toggleFav('${p.name}')">
-                        <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
-                    </button>
+                    <div class="origin-label ${originClass}">${originText}</div>
+
                     <div class="pokemon-img-container">
                         <img src="${p.sprites.front_default}" alt="${p.name}" class="pokemon-img">
                     </div>
+
                     <div class="pokemon-info">
                         <h2 class="pokemon-name">#${p.id} ${p.name}</h2>
                         <div class="pokemon-types">${typesHtml}</div>
                         <div class="abilities-list"><strong>HABILIDADES:</strong> ${abilities}</div>
+                        
                         <div class="stats-grid">${statsHtml}</div>
+
+                        <button class="fav-toggle-btn ${isFav ? 'is-favorite' : ''}" onclick="App.toggleFav('${p.name}')">
+                            <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                        </button>
+
                         <div class="evolution-section">
                             <h3>CADENA EVOLUTIVA</h3>
                             <div id="evo-chain-container" class="evolution-chain">Cargando...</div>
