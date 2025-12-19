@@ -1,333 +1,550 @@
-:root {
-    --bg-color: #e0e0e0;
-    --card-bg: #ffffff;
-    --border-color: #000000;
-    --shadow-color: #000000;
-    --accent-color: #ff3e3e; /* Rojo */
-    --secondary-accent: #4deeea; /* Cyan */
-    --yellow-accent: #ffeb3b; /* Amarillo */
-    --border-width: 4px;
-    --shadow-offset: 8px;
-    --font-main: 'Courier New', Courier, monospace;
+:root{
+  --bg:#e0e0e0;
+  --border:#000;
+  --card:#fff;
+  --shadow:#000;
+  --teal:#4deeea;
+  --red:#ff3e3e;
+  --yellow:#ffeb3b;
+  --gray:#bfbfbf;
+  --font:'Courier New', Courier, monospace;
+  --bw:4px;
+  --shadowoff:8px;
 }
 
-* { box-sizing: border-box; }
-
-body {
-    background-color: var(--bg-color);
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 20px 20px;
-    font-family: var(--font-main);
-    margin: 0;
-    padding: 2rem;
-    color: var(--border-color);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  padding:24px;
+  font-family:var(--font);
+  background: var(--bg);
+  background-image: radial-gradient(#000 1px, transparent 1px);
+  background-size: 20px 20px;
+  color:#000;
+  display:flex;
+  justify-content:center;
 }
 
-/* Fondo decorativo geométrico (del profesor) */
-body::before {
-    content: "";
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%) rotate(-20deg);
-    width: 80vmin; height: 80vmin;
-    border: 16px solid #000;
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff 12%, #000 12%, #000 16%, transparent 16%),
-                linear-gradient(180deg, transparent 46%, #000 46%, #000 54%, transparent 54%),
-                linear-gradient(180deg, #ff3e3e 50%, #ffffff 50%);
-    box-shadow: 24px 24px 0px rgba(0,0,0,0.2);
-    z-index: -1;
-    opacity: 0.8;
-    pointer-events: none;
-    filter: grayscale(0.2) contrast(1.2);
+.app-shell{
+  width:min(980px, 100%);
+  position:relative;
+  padding:20px;
 }
 
-h1 {
-    font-size: clamp(2rem, 5vw, 4rem);
-    text-transform: uppercase;
-    background-color: var(--secondary-accent);
-    border: var(--border-width) solid var(--border-color);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
-    padding: 1rem 2rem;
-    margin-bottom: 2rem;
-    transform: rotate(-2deg);
-    max-width: 90%;
-    text-align: center;
+/* Pokebola de fondo */
+.pokeball-bg{
+  position:fixed;
+  inset: 90px 0 0 0;
+  margin:auto;
+  width:min(500px, 60%);
+  top: 80%;
+  left: 37%;
+  transform: translate(-50%, -50%) rotate(20deg);
+  aspect-ratio:1/1;
+  border:15px solid #111;
+  border-radius:50%;
+  background:
+    linear-gradient(
+    140deg,
+    #ff5b5b 0 47%,
+    #111 47% 53%,
+    #fff 53% 100%
+  );
+  box-shadow: 14px 14px 0 rgba(0,0,0,.25);
+  z-index:-1;
+  opacity: 90%;
+}
+.pokeball-bg::before{
+  content:"";
+  position:absolute;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width: 18%;
+  aspect-ratio:1/1;
+  border:18px solid #111;
+  border-radius:50%;
+  background:#fff;
 }
 
-/* --- NAVEGACIÓN --- */
-.main-nav {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+/* Banner título */
+.title-banner{
+  display:flex;
+  justify-content:center;
+  margin:0 0 14px 0;
+  transform: rotate(-3deg);
+  padding-top: 5%;
+}
+.title-banner h1{
+  margin:0;
+  padding:18px 26px;
+  background:var(--teal);
+  border:var(--bw) solid var(--border);
+  box-shadow: var(--shadowoff) var(--shadowoff) 0 var(--shadow);
+  letter-spacing:2px;
+  font-size: clamp(28px, 4vw, 54px);
+  font-weight:900;
+  text-transform:uppercase;
 }
 
-.nav-btn {
-    background: var(--card-bg);
-    border: var(--border-width) solid var(--border-color);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
-    padding: 0.8rem 1.5rem;
-    font-family: var(--font-main);
-    font-weight: 900;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.2s;
+/* Nav */
+.main-nav{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin: 10px 0 18px 0;
+  padding-top: 2%;
+}
+.nav-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:#fff;
+  border:var(--bw) solid var(--border);
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding:12px 18px;
+  cursor:pointer;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.nav-btn .btn-ico{font-size:18px}
+.nav-btn.active{ background:var(--teal); }
+.nav-btn:active{
+  transform: translate(2px,2px);
+  box-shadow:4px 4px 0 var(--shadow);
 }
 
-.nav-btn:hover, .nav-btn.active {
+.nav-btn:hover {
     transform: translate(-4px, -4px);
-    box-shadow: 12px 12px 0 var(--shadow-color);
-    background-color: var(--yellow-accent);
+    background-color: rgb(255, 200, 0);
 }
 
-.nav-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0 black;
+/* Views */
+.view-section{display:none}
+.view-section.active{display:block}
+
+/* Buscar */
+.search-row{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom: 16px;
+}
+.toggle-select{
+  min-width:180px;
+  padding:14px 16px;
+  border:var(--bw) solid var(--border);
+  box-shadow: 6px 6px 0 var(--shadow);
+  font-weight:900;
+  background: var(--yellow);
+  cursor:pointer;
+  text-transform:uppercase;
+}
+.search-input{
+  width:min(300px, 92vw);
+  padding:16px 18px;
+  border:var(--bw) solid var(--border);
+  box-shadow: 6px 6px 0 var(--shadow);
+  font-weight:900;
+  letter-spacing:1px;
+  outline:none;
+}
+.search-input:focus{background:#f7f7f7}
+
+/* Botones */
+.action-btn{
+  padding:16px 22px;
+  border:var(--bw) solid var(--border);
+  box-shadow: 6px 6px 0 var(--shadow);
+  font-weight:900;
+  letter-spacing:1px;
+  cursor:pointer;
+  text-transform:uppercase;
+}
+.action-btn.small{padding:12px 16px}
+.action-btn.wide{
+  width:min(560px, 96%);
+  display:block;
+  margin: 16px auto 0 auto;
+}
+.btn-red{background:var(--red); color:#fff;}
+.btn-gray{background:var(--gray); color:#111;}
+.btn-gray[disabled]{opacity:.65; cursor:not-allowed;}
+
+.content-area{
+  width:min(640px, 100%);
+  margin: 0 auto;
 }
 
-/* --- SECCIONES Y UTILIDADES --- */
-.view-section { width: 100%; max-width: 600px; display: none; }
-.view-section.active { display: block; animation: fadeIn 0.3s ease; }
-
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(10px); } 
-    to { opacity: 1; transform: translateY(0); } 
+/* Card principal */
+.pokemon-card{
+  position:relative;
+  background:var(--card);
+  border:var(--bw) solid var(--border);
+  box-shadow: var(--shadowoff) var(--shadowoff) 0 var(--shadow);
+  padding:18px;
+  margin: 0 auto 18px auto;
 }
 
-form {
-    width: 100%;
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+
+.origin-label{
+  position:absolute;
+  top:-14px; right:-14px;
+  border:var(--bw) solid var(--border);
+  padding:8px 12px;
+  font-weight:900;
+  letter-spacing:1px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  box-shadow: 6px 6px 0 var(--shadow);
+  text-transform:uppercase;
+  font-size: 12px;
+}
+.origin-api{background:var(--teal)}
+.origin-cache{background:#8cff7a}
+.origin-invalid{background:var(--yellow)}
+
+.pokemon-img-container{
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 8px auto;
+  border:var(--bw) solid var(--border);
+  background: repeating-linear-gradient(135deg, #f2f2f2, #f2f2f2 12px, #fff 12px, #fff 24px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.pokemon-img{width:160px; height:160px; image-rendering:pixelated}
+
+.pokemon-title{
+  font-size:36px;
+  font-weight:900;
+  letter-spacing:2px;
+  margin: 10px 0 8px 0;
+  text-transform:uppercase;
+  border-bottom:4px solid #000;
+  padding-bottom:10px;
+}
+.type-row{display:flex; gap:10px; flex-wrap:wrap; margin: 10px 0 12px 0;}
+.type-badge{
+  padding:8px 12px;
+  border:var(--bw) solid #000;
+  background:#000;
+  color:#fff;
+  font-weight:900;
+  text-transform:uppercase;
+  font-size: 12px;
 }
 
-input {
-    flex: 1;
-    padding: 1rem;
-    font-family: inherit;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border: var(--border-width) solid var(--border-color);
-    background-color: var(--card-bg);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
-    outline: none;
-    min-width: 200px;
+.block-title{
+  margin: 14px 0 8px 0;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:1px;
 }
 
-button.action-btn {
-    padding: 1rem 2rem;
-    font-family: inherit;
-    font-size: 1.2rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    background-color: var(--accent-color);
-    color: white;
-    border: var(--border-width) solid var(--border-color);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
-    cursor: pointer;
-    transition: all 0.1s;
+.ability-row{display:flex; gap:10px; flex-wrap:wrap}
+.ability-pill{
+  padding:8px 12px;
+  border:var(--bw) solid #000;
+  background: var(--yellow);
+  font-weight:900;
+}
+.ability-pill.hidden{background:#8cff7a}
+
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin: 8px 0;
+}
+.stat-label{width:160px; font-weight:900; text-transform:uppercase; font-size: 14px;}
+.stat-bar-container{
+  flex:1;
+  height: 22px;
+  border:var(--bw) solid #000;
+  background:#fff;
+  position:relative;
+}
+.stat-bar{
+  height:100%;
+  background:var(--teal);
+  border-right:var(--bw) solid #000;
 }
 
-button.action-btn:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0 black; }
-button.action-btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 black; }
-.btn-black { background-color: var(--border-color); margin-top: 20px; }
+/* Botón favorito grande */
+.like-btn{
+  width:70px;
+  height:70px;
+  border:var(--bw) solid #000;
+  box-shadow: 6px 6px 0 var(--shadow);
+  background:#ffd1df;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  margin: 12px auto 0 auto;
+  font-size: 26px;
+}
+.like-btn.on{background:#ff9ab5}
+.like-btn:active{transform:translate(2px,2px); box-shadow:4px 4px 0 var(--shadow);}
 
-/* --- TARJETA POKEMON --- */
-.pokemon-card {
-    background-color: var(--card-bg);
-    border: var(--border-width) solid var(--border-color);
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--shadow-color);
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative; /* Importante para los elementos absolute */
-    margin-bottom: 2rem;
-    padding-top: 3rem; /* Espacio extra para el badge de arriba */
+.divider-dash{
+  border-top: 4px dashed #000;
+  margin: 18px 0;
 }
 
-.pokemon-card::before {
-    content: "POKEMON_DATA";
-    position: absolute;
-    top: 0; left: 0;
-    background: var(--border-color);
-    color: white;
-    padding: 0.2rem 0.5rem;
-    font-size: 0.8rem;
-    font-weight: bold;
+/* Evoluciones (boxes + hover + seleccionado) */
+.evo-title{
+  text-align:center;
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin: 6px 0 12px 0;
+}
+.evo-chain{padding-left: 7%; display:flex; flex-direction:row; gap:10px; align-items:center;}
+.evo-level{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center;}
+.evo-arrow{
+  font-weight:900;
+  font-size:22px;
+  color:var(--red);
+}
+.evo-card{
+  width: 150px;
+  border:var(--bw) solid #000;
+  box-shadow: 6px 6px 0 var(--shadow);
+  background:#fff;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+}
+.evo-card.selected{background:var(--teal)}
+.evo-card:hover{background:var(--yellow)}
+.evo-card img{width:72px; height:72px; image-rendering:pixelated}
+.evo-card .name{display:block; font-weight:900; text-transform:uppercase; margin-top:6px; font-size:13px;}
+
+/* Banners secciones */
+.section-banner{
+  width:min(760px, 100%);
+  margin: 0 auto 14px auto;
+  background: var(--teal);
+  border:var(--bw) solid #000;
+  box-shadow: var(--shadowoff) var(--shadowoff) 0 var(--shadow);
+  padding:16px 18px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.section-banner .banner-ico{font-size:30px}
+.section-banner .banner-text{
+  font-size:44px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
 }
 
-.origin-label {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 4px 10px;
-    border: 3px solid black;
-    background: white;
-    z-index: 10;
-    text-transform: uppercase;
+/* Listas historial/favoritos */
+.simple-list{
+  width:min(760px, 100%);
+  margin: 0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.list-item{
+  background:#fff;
+  border:var(--bw) solid #000;
+  box-shadow: 8px 8px 0 var(--shadow);
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.list-item .mini{
+  width:56px;
+  height:56px;
+  border:var(--bw) solid #000;
+  display:grid;
+  place-items:center;
+  background:#fff;
+}
+.list-item img{width:46px; height:46px; image-rendering:pixelated}
+.list-item .info{flex:1; min-width: 160px;}
+.list-item .info .title{
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:6px;
+}
+.list-item .actions{display:flex; gap:10px;}
+.icon-btn{
+  width:52px; height:52px;
+  border:var(--bw) solid #000;
+  box-shadow: 6px 6px 0 var(--shadow);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  background:#ffd1df;
+  font-size:20px;
+}
+.icon-btn.trash{background:var(--red); color:#fff;}
+.icon-btn:active{transform:translate(2px,2px); box-shadow:4px 4px 0 var(--shadow);}
+
+/* Empty states */
+.empty-state{
+  background:#fff;
+  border:var(--bw) solid #000;
+  box-shadow: var(--shadowoff) var(--shadowoff) 0 var(--shadow);
+  padding:30px 18px;
+  text-align:center;
+}
+.empty-state .ico{font-size:48px; margin-bottom:10px}
+.empty-state .t1{font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px}
+.empty-state .t2{opacity:.9}
+
+/* VS */
+.vs-top{
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom: 12px;
+}
+.vs-search{display:flex; gap:10px; align-items:center;}
+.vs-mid{font-weight:900; font-size:26px; color:var(--red); text-shadow:2px 2px 0 #000;}
+
+.vs-cards{
+  width:min(760px, 100%);
+  margin: 16px auto 0 auto;
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap:14px;
+  align-items:center;
+}
+.vs-icon{font-size:34px; text-align:center}
+.vs-card-slot{min-height: 260px;}
+
+.vs-mini-card{
+  position:relative;
+  background:#fff;
+  border:var(--bw) solid #000;
+  box-shadow: 8px 8px 0 var(--shadow);
+  padding:14px;
+  text-align:center;
+  max-width: 300px;
+  margin: 0 auto;
+}
+.vs-mini-card .mini-origin{
+  position:absolute;
+  top:-12px; right:-12px;
+  border:var(--bw) solid #000;
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding:6px 10px;
+  font-weight:900;
+  font-size:12px;
+  text-transform:uppercase;
+  display:flex; gap:6px; align-items:center;
+}
+.vs-mini-card img{width:72px; height:72px; image-rendering:pixelated; margin: 4px auto;}
+.vs-mini-card .name{font-weight:900; text-transform:uppercase; margin: 8px 0 6px 0;}
+.vs-mini-card .score{
+  font-weight:900;
+  font-size: 34px;
+  color:#ff6d6d;
+  margin-top: 8px;
+}
+.vs-mini-card.winner{background:#8cff7a}
+.vs-mini-card.loser{background:#dcdcdc}
+.vs-mini-card .winner-badge{
+  position:absolute;
+  top:-14px; left:50%;
+  transform:translateX(-50%);
+  background:var(--yellow);
+  border:var(--bw) solid #000;
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding:6px 12px;
+  font-weight:900;
+  text-transform:uppercase;
+  display:flex; gap:8px; align-items:center;
 }
 
-.origin-api { color: #007bff; border-color: #007bff; }
-.origin-cache { color: #28a745; border-color: #28a745; }
-
-/* Botón Favorito Corazón */
-.fav-toggle-btn {
-    position: relative; /* Cambiado de absolute a relative para que fluya con el contenido */
-    margin-top: 20px;   /* Espacio después de las barras */
-    background: #ffd1d1; /* Fondo rosado suave como en tu imagen */
-    border: 3px solid black;
-    padding: 10px 15px;
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: #555;
-    box-shadow: 4px 4px 0px black;
-    transition: all 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Resultado batalla */
+.battle-area{
+  width:min(860px, 100%);
+  margin: 20px auto 0 auto;
+  background:#fff;
+  border:var(--bw) solid #000;
+  box-shadow: var(--shadowoff) var(--shadowoff) 0 var(--shadow);
+  padding: 18px;
 }
-
-.fav-toggle-btn:hover { 
-    transform: translate(-2px, -2px); 
-    box-shadow: 6px 6px 0px black;
+.hidden{display:none}
+.battle-title{
+  text-align:center;
+  font-weight:900;
+  font-size:24px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding-bottom:12px;
+  border-bottom:4px dashed #000;
+  margin-bottom: 14px;
 }
-
-.fav-toggle-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px black;
+.battle-winner-row{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap:14px;
+  align-items:center;
+  margin-bottom: 16px;
 }
-
-.fav-toggle-btn.is-favorite { 
-    color: #ff0000; /* Corazón rojo cuando es favorito */
+.battle-section-title{
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  margin: 8px 0 12px 0;
+  text-align:center;
 }
-
-.pokemon-img-container {
-    width: 200px; height: 200px;
-    border: var(--border-width) solid var(--border-color);
-    margin-bottom: 1.5rem;
-    background-color: #f8f8f8;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
+.battle-box{
+  border:var(--bw) solid #000;
+  background:#e9e9e9;
+  padding:14px;
+  margin: 12px 0;
 }
-
-/* Trama de fondo en la imagen */
-.pokemon-img-container::after {
-    content: ""; position: absolute; width: 100%; height: 100%;
-    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
-    z-index: 0;
+.adv-row{
+  border:var(--bw) solid #000;
+  padding:10px 12px;
+  margin: 10px 0;
 }
+.adv-row.good{background:#8cff7a}
+.adv-row.bad{background:#ff6d6d}
+.mono{font-family:var(--font)}
 
-.pokemon-img { width: 100%; height: 100%; object-fit: contain; z-index: 1; image-rendering: pixelated; }
-
-.pokemon-info { width: 100%; text-align: left; }
-.pokemon-name {
-    font-size: 2rem; text-transform: uppercase;
-    border-bottom: var(--border-width) solid var(--border-color);
-    margin: 0 0 1rem 0; padding-bottom: 0.5rem;
+.compare-grid{
+  display:grid;
+  grid-template-columns: 60px 1fr 60px;
+  gap:10px;
+  align-items:center;
 }
-
-/* Tipos */
-.pokemon-types { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.type-badge {
-    background-color: var(--border-color); color: white;
-    padding: 0.5rem 1rem; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; border: 2px solid black;
+.compare-bar{
+  height: 22px;
+  border:var(--bw) solid #000;
+  background:#fff;
+  position:relative;
 }
-
-.abilities-list { font-size: 0.9rem; margin-bottom: 1.5rem; border: 2px solid black; padding: 10px; background: #eee; }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; width: 100%; font-size: 0.9rem; }
-.stat-label { font-weight: bold; }
-.stat-bar-container { width: 100%; height: 1.2rem; border: 2px solid var(--border-color); position: relative; background: #fff; }
-.stat-bar { height: 100%; background-color: var(--secondary-accent); border-right: 2px solid black; }
-
-/* Evoluciones */
-.evolution-section { margin-top: 1.5rem; padding-top: 1rem; border-top: 4px solid black; width: 100%; }
-.evolution-chain { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; margin-top: 10px; }
-.evo-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
-.evo-item:hover { transform: scale(1.1); }
-.evo-arrow { font-size: 1.2rem; }
-
-/* Listas y Empty States */
-.simple-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-.list-item {
-    background: white; border: 4px solid black; padding: 10px;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 4px 4px 0 black;
+.compare-bar .left{
+  position:absolute; left:0; top:0; bottom:0;
+  background:#4deeea;
+  border-right:var(--bw) solid #000;
 }
-.section-header { background: white; border: 4px solid black; padding: 10px; font-weight: bold; display: inline-block; margin-bottom: 15px; }
-.fav-header { background: var(--accent-color); color: white; }
-.empty-state { text-align:center; font-weight:bold; padding:2rem; border:4px dashed black; background: rgba(255,255,255,0.5); }
-
-/* --- BATALLA VS --- */
-.vs-arena { display: flex; flex-direction: column; gap: 20px; text-align: center; }
-.vs-inputs { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
-.vs-inputs input { max-width: 150px; }
-.vs-badge { font-size: 2rem; font-weight: 900; color: var(--accent-color); font-style: italic; }
-
-.fighters-display { display: flex; justify-content: space-around; align-items: center; margin-top: 20px; gap: 10px; }
-.fighter-box { width: 45%; border: 4px solid black; padding: 10px; background: white; box-shadow: 6px 6px 0 black; display: flex; flex-direction: column; align-items: center;}
-.fighter-box img { width: 100px; height: 100px; image-rendering: pixelated; }
-
-.winner-badge { background: var(--yellow-accent); padding: 5px; font-weight: bold; border: 2px solid black; display: inline-block; margin-bottom: 5px; animation: blink 1s infinite;}
-.score-text { font-weight: bold; font-size: 1.5rem; margin-top: 10px; }
-.battle-log { margin-top:15px; background:white; border:4px solid black; padding:10px; }
-
-.hidden { display: none !important; }
-
-/* --- ACTUALIZACIÓN DE ESTILOS DE LISTA --- */
-
-.list-item {
-    background: white; 
-    border: 4px solid black; 
-    padding: 10px;
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    box-shadow: 4px 4px 0 black;
-    margin-bottom: 10px; /* Separación entre items */
+.compare-bar .right{
+  position:absolute; right:0; top:0; bottom:0;
+  background: var(--yellow);
+  border-left:var(--bw) solid #000;
 }
-
-.item-name {
-    font-weight: bold; 
-    text-transform: uppercase;
-    font-size: 1.1rem;
-}
-
-/* Grupo de botones a la derecha */
-.item-actions {
-    display: flex;
-    gap: 8px; /* Espacio entre los botoncitos */
-}
-
-/* Botones pequeños de la lista */
-.sm-btn {
-    padding: 6px 10px;
-    font-size: 0.9rem;
-    min-width: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Estilo activo para el corazón (Rojo) */
-.fav-active i {
-    color: red;
-}
-
-/* Hover para el botón de borrar (Rojo de alerta) */
-.btn-del:hover {
-    background-color: var(--accent-color) !important;
-    color: white;
-    border-color: black;
+.compare-label{
+  font-weight:900;
+  text-transform:uppercase;
+  margin: 10px 0 6px 0;
+  text-align:center;
 }
